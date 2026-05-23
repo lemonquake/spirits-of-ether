@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RefreshCw, Skull, Sparkles } from 'lucide-react';
 import { useGameStore } from './store/gameStore';
 import GameCanvas from './components/3d/GameCanvas';
@@ -26,8 +26,23 @@ export default function App() {
     setActiveTab(null);
   };
 
+  // Attempt to lock screen orientation to landscape on supported devices
+  useEffect(() => {
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {
+        // Orientation lock not supported on this device/browser - the CSS overlay will handle it
+      });
+    }
+  }, []);
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      {/* Portrait orientation warning overlay */}
+      <div className="rotate-device-overlay">
+        <div className="rotate-icon" />
+        <h2>Rotate Your Device</h2>
+        <p>Spirits of Ether is best experienced in landscape mode. Please rotate your device to continue.</p>
+      </div>
       {/* 3D Game Engine Canvas Viewport */}
       <GameCanvas />
 

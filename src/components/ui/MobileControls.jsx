@@ -13,7 +13,7 @@ export default function MobileControls() {
   const [isDragging, setIsDragging] = useState(false);
 
   // Maximum radius in pixels for knob displacement
-  const maxRadius = 45;
+  const maxRadius = 32;
 
   const handleStart = (clientX, clientY, touchId = null) => {
     if (!containerRef.current) return;
@@ -169,10 +169,10 @@ export default function MobileControls() {
         onTouchCancel={handleTouchEnd}
         style={{
           position: 'absolute',
-          bottom: '50px',
-          left: '50px',
-          width: '120px',
-          height: '120px',
+          bottom: '25px',
+          left: '25px',
+          width: '90px',
+          height: '90px',
           borderRadius: '50%',
           border: '2px solid rgba(212, 175, 55, 0.35)',
           background: 'rgba(15, 9, 5, 0.65)',
@@ -192,8 +192,8 @@ export default function MobileControls() {
 
         {/* Joystick Knob */}
         <div style={{
-          width: '52px',
-          height: '52px',
+          width: '38px',
+          height: '38px',
           borderRadius: '50%',
           background: 'linear-gradient(135deg, var(--wood-light) 0%, var(--wood-dark) 100%)',
           border: '2px solid var(--rpg-gold)',
@@ -206,8 +206,8 @@ export default function MobileControls() {
         }}>
           {/* Glowing center indicator */}
           <div style={{
-            width: '12px',
-            height: '12px',
+            width: '10px',
+            height: '10px',
             borderRadius: '50%',
             background: 'var(--rpg-gold)',
             boxShadow: '0 0 10px var(--rpg-gold)',
@@ -219,10 +219,10 @@ export default function MobileControls() {
       {/* 2. Action Gamepad Buttons (Bottom Right) */}
       <div style={{
         position: 'absolute',
-        bottom: '50px',
-        right: '50px',
-        width: '200px',
-        height: '200px',
+        bottom: '15px',
+        right: '15px',
+        width: '140px',
+        height: '140px',
         pointerEvents: 'none'
       }}>
         {/* Diamond button array */}
@@ -233,14 +233,14 @@ export default function MobileControls() {
           style={{
             position: 'absolute',
             top: '0px',
-            left: '65px',
-            width: '70px',
-            height: '70px',
+            left: '45px',
+            width: '50px',
+            height: '50px',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, var(--astral-purple) 0%, #6d28d9 100%)',
-            border: '2.5px solid rgba(255,255,255,0.25)',
+            border: '2px solid rgba(255,255,255,0.25)',
             color: '#fff',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.5), 0 0 8px rgba(176, 102, 255, 0.3)',
+            boxShadow: '0 3px 8px rgba(0,0,0,0.5), 0 0 6px rgba(176, 102, 255, 0.3)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -251,8 +251,8 @@ export default function MobileControls() {
           }}
           className="mobile-btn"
         >
-          <User size={18} />
-          <span style={{ fontSize: '9px', fontWeight: 800, marginTop: '2px', letterSpacing: '0.05em' }}>HERO</span>
+          <User size={14} />
+          <span style={{ fontSize: '7px', fontWeight: 800, marginTop: '1px', letterSpacing: '0.05em' }}>HERO</span>
         </button>
 
         {/* Items (Left - gold theme) */}
@@ -260,15 +260,15 @@ export default function MobileControls() {
           onClick={pressItems}
           style={{
             position: 'absolute',
-            top: '65px',
+            top: '45px',
             left: '0px',
-            width: '70px',
-            height: '70px',
+            width: '50px',
+            height: '50px',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, var(--xp-color) 0%, #b45309 100%)',
-            border: '2.5px solid rgba(255,255,255,0.25)',
+            border: '2px solid rgba(255,255,255,0.25)',
             color: '#fff',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.5), 0 0 8px rgba(212, 175, 55, 0.3)',
+            boxShadow: '0 3px 8px rgba(0,0,0,0.5), 0 0 6px rgba(212, 175, 55, 0.3)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -279,8 +279,8 @@ export default function MobileControls() {
           }}
           className="mobile-btn"
         >
-          <Briefcase size={18} />
-          <span style={{ fontSize: '9px', fontWeight: 800, marginTop: '2px', letterSpacing: '0.05em' }}>ITEMS</span>
+          <Briefcase size={14} />
+          <span style={{ fontSize: '7px', fontWeight: 800, marginTop: '1px', letterSpacing: '0.05em' }}>ITEMS</span>
         </button>
 
         {/* Back / Cancel (Right - red theme) */}
@@ -288,15 +288,15 @@ export default function MobileControls() {
           onClick={pressBack}
           style={{
             position: 'absolute',
-            top: '65px',
+            top: '45px',
             right: '0px',
-            width: '70px',
-            height: '70px',
+            width: '50px',
+            height: '50px',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, var(--hp-color) 0%, #991b1b 100%)',
-            border: '2.5px solid rgba(255,255,255,0.25)',
+            border: '2px solid rgba(255,255,255,0.25)',
             color: '#fff',
-            boxShadow: '0 4px 10px rgba(0,0,0,0.5), 0 0 8px rgba(220, 38, 38, 0.3)',
+            boxShadow: '0 3px 8px rgba(0,0,0,0.5), 0 0 6px rgba(220, 38, 38, 0.3)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -307,8 +307,8 @@ export default function MobileControls() {
           }}
           className="mobile-btn"
         >
-          <CornerUpLeft size={18} />
-          <span style={{ fontSize: '9px', fontWeight: 800, marginTop: '2px', letterSpacing: '0.05em' }}>BACK</span>
+          <CornerUpLeft size={14} />
+          <span style={{ fontSize: '7px', fontWeight: 800, marginTop: '1px', letterSpacing: '0.05em' }}>BACK</span>
         </button>
 
         {/* Action / OK (Bottom - cyan theme) */}
@@ -317,14 +317,14 @@ export default function MobileControls() {
           style={{
             position: 'absolute',
             bottom: '0px',
-            left: '58px',
-            width: '84px',
-            height: '84px',
+            left: '40px',
+            width: '60px',
+            height: '60px',
             borderRadius: '50%',
             background: 'linear-gradient(135deg, var(--ether-cyan) 0%, #0369a1 100%)',
-            border: '3px solid rgba(255,255,255,0.3)',
+            border: '2.5px solid rgba(255,255,255,0.3)',
             color: '#fff',
-            boxShadow: '0 5px 12px rgba(0,0,0,0.55), 0 0 12px rgba(78, 158, 255, 0.4)',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.55), 0 0 10px rgba(78, 158, 255, 0.4)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -335,8 +335,8 @@ export default function MobileControls() {
           }}
           className="mobile-btn-action"
         >
-          <CheckCircle2 size={22} />
-          <span style={{ fontSize: '10px', fontWeight: 800, marginTop: '2px', letterSpacing: '0.05em' }}>ACTION</span>
+          <CheckCircle2 size={16} />
+          <span style={{ fontSize: '8px', fontWeight: 800, marginTop: '1px', letterSpacing: '0.05em' }}>ACTION</span>
         </button>
       </div>
 
