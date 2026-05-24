@@ -12,6 +12,7 @@ import MainMenu from './components/ui/MainMenu';
 import PauseMenu from './components/ui/PauseMenu';
 import MobileControls from './components/ui/MobileControls';
 import InteractiveMap from './components/ui/InteractiveMap';
+import SplashScreen from './components/ui/SplashScreen';
 
 export default function App() {
   const phase = useGameStore(state => state.phase);
@@ -20,6 +21,7 @@ export default function App() {
   const restartGame = useGameStore(state => state.restartGame);
   const controlScheme = useGameStore(state => state.controlScheme);
   const [activeTab, setActiveTab] = useState(null); // null | 'character' | 'inventory' | 'map'
+  const [showSplash, setShowSplash] = useState(true);
 
   const handleRestart = () => {
     restartGame();
@@ -43,6 +45,12 @@ export default function App() {
         <h2>Rotate Your Device</h2>
         <p>Spirits of Ether is best experienced in landscape mode. Please rotate your device to continue.</p>
       </div>
+
+      {/* Splash Screen / Loading Screen Overlay */}
+      {showSplash && (
+        <SplashScreen onFinished={() => setShowSplash(false)} />
+      )}
+
       {/* 3D Game Engine Canvas Viewport */}
       <GameCanvas />
 

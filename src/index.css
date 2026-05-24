@@ -1456,3 +1456,398 @@ body {
     display: none !important;
   }
 }
+
+/* ==========================================
+   EPIC SPLASH & TITLE SCREEN STYLING (NEW)
+   ========================================== */
+
+/* Key Art Fullscreen Background */
+.title-screen-bg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('./assets/game_poster.png');
+  background-size: cover;
+  background-position: center top;
+  overflow: hidden;
+  z-index: 10;
+}
+
+/* Background image scaling for deep effect */
+.title-screen-bg-image {
+  width: 100%;
+  height: 100%;
+  background-image: url('./assets/game_poster.png');
+  background-size: cover;
+  background-position: center top;
+  transform: scale(1.02);
+  transition: transform 10s ease-out;
+}
+
+.title-screen-bg-container.zoomed .title-screen-bg-image {
+  transform: scale(1.08);
+}
+
+/* Glowing overlay layers on characters weapons */
+.weapon-glow-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 11;
+}
+
+/* Azrin's crimson sword swirling with blue energy */
+.azrin-sword-glow {
+  position: absolute;
+  width: 35vw;
+  height: 35vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(78, 158, 255, 0.45) 0%, rgba(78, 158, 255, 0.15) 30%, rgba(78, 158, 255, 0) 70%);
+  left: 10%;
+  bottom: 25%;
+  mix-blend-mode: screen;
+  animation: pulse-glow-cyan 6s infinite ease-in-out;
+  pointer-events: none;
+}
+
+/* Azrael's staff with purple energy */
+.azrael-staff-glow {
+  position: absolute;
+  width: 40vw;
+  height: 40vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(176, 102, 255, 0.5) 0%, rgba(176, 102, 255, 0.18) 35%, rgba(176, 102, 255, 0) 70%);
+  right: 12%;
+  top: 15%;
+  mix-blend-mode: screen;
+  animation: pulse-glow-purple 5s infinite ease-in-out;
+  pointer-events: none;
+}
+
+/* Glowing animations */
+@keyframes pulse-glow-cyan {
+  0%, 100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.15) translate(-10px, 10px);
+    opacity: 1;
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes pulse-glow-purple {
+  0%, 100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.2) translate(15px, -15px);
+    opacity: 1;
+    filter: brightness(1.35);
+  }
+}
+
+/* Shimmering Text Gradient for title */
+.shimmering-title {
+  background: linear-gradient(90deg, #fffcf0 0%, #d4af37 25%, #fffcf0 50%, #d4af37 75%, #fffcf0 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: text-shimmer-sweep 4s linear infinite;
+  text-shadow: 0 4px 20px rgba(212, 175, 55, 0.35);
+}
+
+@keyframes text-shimmer-sweep {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Floating Ether Spirits */
+.ether-spirit-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.ether-spirit {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.8));
+}
+
+.ether-spirit-core {
+  width: 14px;
+  height: 14px;
+  background: #e0f7fa;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #22d3ee, 0 0 25px #06b6d4, 0 0 50px rgba(6, 182, 212, 0.4);
+  animation: pulse-spirit-core 2s infinite ease-in-out;
+}
+
+.ether-spirit-trail {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(34, 211, 238, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 0 8px #22d3ee;
+  opacity: 0.5;
+}
+
+.ether-spirit-trail.t1 {
+  transform: translate(-15px, 8px) scale(0.7);
+  animation: spirit-trail-wobble 1.5s infinite ease-in-out;
+}
+
+.ether-spirit-trail.t2 {
+  transform: translate(-28px, 15px) scale(0.4);
+  animation: spirit-trail-wobble 2s infinite ease-in-out 0.3s;
+}
+
+/* Spirit Animations */
+.spirit-cyan-1 {
+  left: 80%;
+  top: 75%;
+  animation: float-path-1 16s infinite linear;
+}
+
+.spirit-purple-2 {
+  left: 15%;
+  top: 60%;
+  filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.85));
+  animation: float-path-2 19s infinite linear;
+}
+
+.spirit-purple-2 .ether-spirit-core {
+  background: #f3e5f5;
+  box-shadow: 0 0 10px #c084fc, 0 0 25px #a855f7, 0 0 50px rgba(168, 85, 247, 0.4);
+}
+.spirit-purple-2 .ether-spirit-trail {
+  background: rgba(192, 132, 252, 0.6);
+  box-shadow: 0 0 8px #c084fc;
+}
+
+.spirit-gold-3 {
+  left: 45%;
+  top: 85%;
+  filter: drop-shadow(0 0 15px rgba(234, 179, 8, 0.8));
+  animation: float-path-3 23s infinite linear;
+}
+
+.spirit-gold-3 .ether-spirit-core {
+  background: #fffde7;
+  box-shadow: 0 0 10px #fde047, 0 0 25px #eab308, 0 0 50px rgba(234, 179, 8, 0.4);
+  width: 10px;
+  height: 10px;
+}
+.spirit-gold-3 .ether-spirit-trail {
+  background: rgba(253, 224, 71, 0.6);
+  box-shadow: 0 0 8px #fde047;
+}
+
+@keyframes pulse-spirit-core {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.25); opacity: 1; }
+}
+
+@keyframes spirit-trail-wobble {
+  0%, 100% { transform: translate(-15px, 8px) scale(0.7); }
+  50% { transform: translate(-10px, 12px) scale(0.85); }
+}
+
+@keyframes float-path-1 {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.8; }
+  100% { transform: translate(-30vw, -55vh) rotate(-30deg); opacity: 0; }
+}
+
+@keyframes float-path-2 {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  15% { opacity: 0.85; }
+  85% { opacity: 0.85; }
+  100% { transform: translate(45vw, -45vh) rotate(45deg); opacity: 0; }
+}
+
+@keyframes float-path-3 {
+  0% { transform: translate(0, 0); opacity: 0; }
+  5% { opacity: 0.75; }
+  95% { opacity: 0.75; }
+  100% { transform: translate(-10vw, -70vh); opacity: 0; }
+}
+
+/* Splash Screen overlay styles */
+.splash-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 12%;
+  overflow: hidden;
+  background: #000;
+}
+
+.splash-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('./assets/game_poster.png');
+  background-size: cover;
+  background-position: center top;
+  filter: blur(8px) brightness(0.4);
+  transform: scale(1.05);
+  transition: filter 3s ease, transform 3s ease, brightness 3s ease;
+}
+
+.splash-overlay.loaded .splash-backdrop {
+  filter: blur(0px) brightness(0.95);
+  transform: scale(1);
+}
+
+.splash-content {
+  position: relative;
+  z-index: 1010;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+  width: 100%;
+  max-width: 480px;
+  padding: 20px;
+}
+
+.splash-loading-text {
+  font-family: var(--font-title);
+  color: var(--rpg-gold);
+  font-size: 13px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  height: 18px;
+  animation: pulse-loading 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-loading {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+.splash-progress-bar {
+  width: 280px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.splash-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--ether-cyan) 0%, var(--astral-purple) 100%);
+  box-shadow: 0 0 10px var(--ether-cyan);
+  transition: width 0.1s ease-out;
+}
+
+.splash-tap-prompt {
+  font-family: var(--font-title);
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.18em;
+  text-shadow: 0 0 12px rgba(255,255,255,0.7), 0 0 25px rgba(212, 175, 55, 0.4);
+  cursor: pointer;
+  animation: pulse-tap-prompt 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-tap-prompt {
+  0%, 100% {
+    transform: scale(0.97);
+    opacity: 0.6;
+    text-shadow: 0 0 6px rgba(255,255,255,0.5);
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(255,255,255,1), 0 0 35px var(--rpg-gold);
+  }
+}
+
+/* Transition flash & ripple */
+.splash-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(78, 158, 255, 0.5) 40%, rgba(176, 102, 255, 0) 70%);
+  transform: scale(0);
+  animation: splash-ripple-animation 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  pointer-events: none;
+  z-index: 1005;
+}
+
+@keyframes splash-ripple-animation {
+  to {
+    transform: scale(6);
+    opacity: 0;
+  }
+}
+
+/* Premium Hover & Click button layouts */
+.glass-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.glass-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+}
+
+.glass-button:hover::after {
+  transform: translate(100%) skewX(-25deg);
+}
+
+.glass-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  border-color: var(--rpg-gold) !important;
+}
+
+.glass-button:active {
+  transform: scale(0.96);
+}
+
