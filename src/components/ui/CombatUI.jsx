@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Sword, Flame, Briefcase, DoorOpen, Plus, ShieldAlert, Award, Check, X } from 'lucide-react';
+import { Sword, Flame, Briefcase, DoorOpen, Plus, ShieldAlert, Award, Check, X, Shield } from 'lucide-react';
 import { useGameStore, INITIAL_INVENTORY } from '../../store/gameStore';
 
 export default function CombatUI() {
+  const controlScheme = useGameStore(state => state.controlScheme);
   const combat = useGameStore(state => state.combat);
   const characters = useGameStore(state => state.characters);
   const inventory = useGameStore(state => state.inventory);
@@ -268,6 +269,62 @@ export default function CombatUI() {
         
         {/* 1. TOP CENTER: Enemy Health Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {controlScheme === 'MOBILE' && combat.isTargeting && (
+            <div style={{
+              background: 'rgba(7, 7, 10, 0.85)',
+              border: '1.5px solid var(--ether-cyan)',
+              borderRadius: '15px',
+              padding: '6px 14px',
+              color: '#fff',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.5)',
+              animation: 'pop-bounce 0.15s ease'
+            }}>
+              <span>Targeting Mode: Tap target card</span>
+              {combat.currentTargetUnit === 'all_enemies' ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--rpg-gold)', marginLeft: '5px' }}>Confirm All?</span>
+                  <button 
+                    onClick={confirmTargeting}
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      background: '#10b981',
+                      border: 'none',
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Check size={10} />
+                  </button>
+                </div>
+              ) : null}
+              <button 
+                onClick={cancelTargeting} 
+                style={{
+                  background: 'var(--hp-color)',
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: '#fff',
+                  fontSize: '9px',
+                  padding: '2px 8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
           <div style={{
             fontSize: '11px',
             color: 'var(--text-muted)',
@@ -301,7 +358,7 @@ export default function CombatUI() {
                 <div 
                   key={enemy.id}
                   className={`enemy-card-wrapper ${isFlipped ? 'flipped' : ''}`}
-                  style={{ opacity: isDead ? 0.3 : 1 }}
+                  style={{ opacity: isDead ? 0.3 : 1, position: 'relative' }}
                 >
                   <div className="enemy-card-inner">
                     {/* FRONT */}
@@ -348,6 +405,70 @@ export default function CombatUI() {
                       )}
                     </div>
                   </div>
+
+                  {/* MOBILE TARGET CONFIRM TOOLTIP */}
+                  {controlScheme === 'MOBILE' && combat.isTargeting && combat.currentTargetUnit === enemy.id && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '105%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'rgba(7, 7, 10, 0.95)',
+                      border: '1.5px solid #10b981',
+                      borderRadius: '20px',
+                      padding: '4px 10px',
+                      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.75), 0 0 10px rgba(16, 185, 129, 0.3)',
+                      zIndex: 100,
+                      animation: 'pop-bounce 0.15s ease',
+                      pointerEvents: 'auto',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      <span style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold', marginRight: '4px' }}>CONFIRM?</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmTargeting();
+                        }}
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#10b981',
+                          border: 'none',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Check size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          cancelTargeting();
+                        }}
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#ef4444',
+                          border: 'none',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -510,7 +631,7 @@ export default function CombatUI() {
                 <div
                   key={name}
                   className={`combat-card-wrapper ${isFlipped ? 'flipped' : ''}`}
-                  style={{ opacity: isDead ? 0.4 : 1 }}
+                  style={{ opacity: isDead ? 0.4 : 1, position: 'relative' }}
                 >
                   <div className="combat-card-inner">
                     {/* FRONT OF THE CARD */}
@@ -605,13 +726,354 @@ export default function CombatUI() {
                       }}></div>
                     </div>
                   </div>
+
+                  {/* MOBILE CONTEXTUAL ACTION MENU */}
+                  {controlScheme === 'MOBILE' && isActive && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '105%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      gap: '8px',
+                      background: 'rgba(7, 7, 10, 0.9)',
+                      border: '1.5px solid var(--rpg-gold)',
+                      borderRadius: '25px',
+                      padding: '6px 10px',
+                      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.75), 0 0 10px rgba(212, 175, 55, 0.25)',
+                      backdropFilter: 'blur(8px)',
+                      animation: 'pop-bounce 0.2s ease',
+                      alignItems: 'center',
+                      pointerEvents: 'auto',
+                      zIndex: 50
+                    }}>
+                      {/* ATTACK */}
+                      <button 
+                        onClick={() => handleActionClick('attack')}
+                        className="mobile-btn"
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          background: 'linear-gradient(135deg, var(--hp-color) 0%, #7f1d1d 100%)',
+                          outline: 'none'
+                        }}
+                        title="Attack"
+                      >
+                        <Sword size={14} />
+                      </button>
+                      
+                      {/* DEFEND */}
+                      <button 
+                        onClick={() => {
+                          const queueSelectedAction = useGameStore.getState().queueSelectedAction;
+                          queueSelectedAction('def', { targetUnit: name });
+                        }}
+                        className="mobile-btn"
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          background: 'linear-gradient(135deg, var(--xp-color) 0%, #78350f 100%)',
+                          outline: 'none'
+                        }}
+                        title="Defend"
+                      >
+                        <Shield size={14} />
+                      </button>
+
+                      {/* SKILLS */}
+                      <button 
+                        onClick={() => setActiveSubMenu(activeSubMenu === 'skills' ? null : 'skills')}
+                        className="mobile-btn"
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          background: 'linear-gradient(135deg, var(--astral-purple) 0%, #581c87 100%)',
+                          outline: 'none'
+                        }}
+                        title="Skills"
+                      >
+                        <Flame size={14} />
+                      </button>
+
+                      {/* ITEMS */}
+                      <button 
+                        onClick={() => setActiveSubMenu(activeSubMenu === 'items' ? null : 'items')}
+                        className="mobile-btn"
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          background: 'linear-gradient(135deg, #10b981 0%, #064e3b 100%)',
+                          outline: 'none'
+                        }}
+                        title="Items"
+                      >
+                        <Briefcase size={14} />
+                      </button>
+
+                      {/* RUN */}
+                      <button 
+                        onClick={() => exitCombat()}
+                        className="mobile-btn"
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          background: 'linear-gradient(135deg, #4b5563 0%, #1f2937 100%)',
+                          outline: 'none'
+                        }}
+                        title="Run"
+                      >
+                        <DoorOpen size={14} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* MOBILE CONTEXTUAL SKILLS DRAWER */}
+                  {controlScheme === 'MOBILE' && isActive && activeSubMenu === 'skills' && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '135%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                      background: 'rgba(10, 7, 5, 0.95)',
+                      border: '1.5px solid var(--rpg-gold)',
+                      borderRadius: '8px',
+                      padding: '8px',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.8)',
+                      width: '180px',
+                      zIndex: 51,
+                      animation: 'pop-bounce 0.25s ease',
+                      pointerEvents: 'auto'
+                    }}>
+                      <div style={{ fontSize: '10px', color: 'var(--rpg-gold)', fontWeight: 'bold', textAlign: 'center', borderBottom: '1px solid rgba(212, 175, 55, 0.2)', paddingBottom: '4px', marginBottom: '4px' }}>
+                        SELECT SKILL
+                      </div>
+                      {char.skills.map((skill) => {
+                        const hasMp = char.mp >= skill.mpCost;
+                        return (
+                          <button
+                            key={skill.id}
+                            disabled={!hasMp}
+                            onClick={() => handleSkillCast(skill.id)}
+                            style={{
+                              background: 'linear-gradient(180deg, var(--wood-light) 0%, var(--wood-medium) 100%)',
+                              border: '1px solid #7c583f',
+                              borderRadius: '4px',
+                              color: hasMp ? '#fff' : 'rgba(255,255,255,0.4)',
+                              padding: '6px 10px',
+                              fontSize: '11px',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              cursor: hasMp ? 'pointer' : 'not-allowed',
+                              outline: 'none',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <span style={{ fontWeight: 'bold' }}>{skill.name}</span>
+                            <span style={{ fontSize: '9px', color: 'var(--mp-color)', fontWeight: 800 }}>{skill.mpCost}MP</span>
+                          </button>
+                        );
+                      })}
+                      <button
+                        onClick={() => setActiveSubMenu(null)}
+                        style={{
+                          background: 'linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%)',
+                          border: '1px solid #b91c1c',
+                          borderRadius: '4px',
+                          color: '#fff',
+                          padding: '5px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          marginTop: '2px'
+                        }}
+                      >
+                        BACK
+                      </button>
+                    </div>
+                  )}
+
+                  {/* MOBILE CONTEXTUAL ITEMS DRAWER */}
+                  {controlScheme === 'MOBILE' && isActive && activeSubMenu === 'items' && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '135%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                      background: 'rgba(10, 7, 5, 0.95)',
+                      border: '1.5px solid var(--rpg-gold)',
+                      borderRadius: '8px',
+                      padding: '8px',
+                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.8)',
+                      width: '180px',
+                      zIndex: 51,
+                      animation: 'pop-bounce 0.25s ease',
+                      pointerEvents: 'auto'
+                    }}>
+                      <div style={{ fontSize: '10px', color: 'var(--rpg-gold)', fontWeight: 'bold', textAlign: 'center', borderBottom: '1px solid rgba(212, 175, 55, 0.2)', paddingBottom: '4px', marginBottom: '4px' }}>
+                        SELECT ITEM
+                      </div>
+                      {combatConsumables.length === 0 ? (
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', textAlign: 'center', padding: '10px 0' }}>
+                          No items in inventory
+                        </div>
+                      ) : (
+                        combatConsumables.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => handleItemUse(item.id)}
+                            style={{
+                              background: 'linear-gradient(180deg, var(--wood-light) 0%, var(--wood-medium) 100%)',
+                              border: '1px solid #7c583f',
+                              borderRadius: '4px',
+                              color: '#fff',
+                              padding: '6px 10px',
+                              fontSize: '11px',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              cursor: 'pointer',
+                              outline: 'none',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <span style={{ fontWeight: 'bold' }}>{item.name}</span>
+                            <span style={{ fontSize: '9px', color: 'var(--rpg-gold)', fontWeight: 800 }}>x{item.count}</span>
+                          </button>
+                        ))
+                      )}
+                      <button
+                        onClick={() => setActiveSubMenu(null)}
+                        style={{
+                          background: 'linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%)',
+                          border: '1px solid #b91c1c',
+                          borderRadius: '4px',
+                          color: '#fff',
+                          padding: '5px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          marginTop: '2px'
+                        }}
+                      >
+                        BACK
+                      </button>
+                    </div>
+                  )}
+
+                  {/* MOBILE HERO TARGET CONFIRM TOOLTIP */}
+                  {controlScheme === 'MOBILE' && combat.isTargeting && combat.currentTargetUnit === name && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '105%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: 'rgba(7, 7, 10, 0.95)',
+                      border: '1.5px solid #10b981',
+                      borderRadius: '20px',
+                      padding: '4px 10px',
+                      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.75), 0 0 10px rgba(16, 185, 129, 0.3)',
+                      zIndex: 100,
+                      animation: 'pop-bounce 0.15s ease',
+                      pointerEvents: 'auto',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      <span style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold', marginRight: '4px' }}>CONFIRM?</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmTargeting();
+                        }}
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#10b981',
+                          border: 'none',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Check size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          cancelTargeting();
+                        }}
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#ef4444',
+                          border: 'none',
+                          color: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
 
           {/* B. BOTTOM-CENTER: Actions Controls */}
-          <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+          <div style={{ flexGrow: 1, display: controlScheme === 'MOBILE' ? 'none' : 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
             {/* Active Character Turn Indicator */}
             {isPlayerTurn && (
               <div style={{
@@ -814,7 +1276,7 @@ export default function CombatUI() {
           </div>
 
           {/* C. BOTTOM-RIGHT: Battle Logs / Turn Summary */}
-          <div className="glass-panel combat-log-container" style={{ display: 'flex', flexDirection: 'column', height: '180px', overflowY: 'hidden' }}>
+          <div className="glass-panel combat-log-container" style={{ display: controlScheme === 'MOBILE' ? 'none' : 'flex', flexDirection: 'column', height: '180px', overflowY: 'hidden' }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -920,6 +1382,41 @@ export default function CombatUI() {
           </div>
         </div>
       </div>
+
+      {/* COMPACT FLOATING MOBILE LOGS */}
+      {controlScheme === 'MOBILE' && combat.logs.length > 0 && (
+        <div style={{
+          position: 'absolute',
+          bottom: '15px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '320px',
+          background: 'rgba(7, 7, 10, 0.75)',
+          borderRadius: '8px',
+          padding: '6px 12px',
+          border: '1.5px solid rgba(212, 175, 55, 0.25)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.65)',
+          zIndex: 35,
+          pointerEvents: 'none',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '3px'
+        }}>
+          {combat.logs.slice(0, 2).map((log, idx) => (
+            <div key={`mob-log-${idx}`} style={{
+              fontSize: '10px',
+              color: log.includes('strikes') || log.includes('takes') ? '#ff9fb1' : (log.includes('slashes') || log.includes('heals') ? 'var(--ether-cyan)' : 'var(--xp-color)'),
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              textAlign: 'center',
+              opacity: idx === 0 ? 1 : 0.6
+            }}>
+              {log}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 4. OVERLAYS: Battle Result screen */}
       {combat.battleResult && (

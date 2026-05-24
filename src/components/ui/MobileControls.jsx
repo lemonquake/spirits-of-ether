@@ -11,15 +11,24 @@ export default function MobileControls() {
   const touchIdRef = useRef(null);
   const [knobPos, setKnobPos] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [joystickCenter, setJoystickCenter] = useState(null);
 
   // Maximum radius in pixels for knob displacement
   const maxRadius = 32;
 
-  const handleStart = (clientX, clientY, touchId = null) => {
-    if (!containerRef.current) return;
+  const handleStart = (clientX, clientY, touchId = null, initialCenter = null) => {
     setIsDragging(true);
     touchIdRef.current = touchId;
-    updatePosition(clientX, clientY);
+
+    const center = initialCenter || (containerRef.current ? {
+      x: containerRef.current.getBoundingClientRect().left + containerRef.current.getBoundingClientRect().width / 2,
+      y: containerRef.current.getBoundingClientRect().top + containerRef.current.getBoundingClientRect().height / 2
+    } : null);
+
+    if (center) {
+      setJoystickCenter(center);
+      updatePosition(clientX, clientY, center);
+    }
   };
 
   const handleMove = (clientX, clientY) => {
@@ -30,17 +39,21 @@ export default function MobileControls() {
   const handleEnd = () => {
     setIsDragging(false);
     touchIdRef.current = null;
+    setJoystickCenter(null);
     setKnobPos({ x: 0, y: 0 });
     setJoystick({ x: 0, y: 0 });
   };
 
-  const updatePosition = (clientX, clientY) => {
-    const rect = containerRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+  const updatePosition = (clientX, clientY, currentCenter = null) => {
+    const center = currentCenter || joystickCenter || (containerRef.current ? {
+      x: containerRef.current.getBoundingClientRect().left + containerRef.current.getBoundingClientRect().width / 2,
+      y: containerRef.current.getBoundingClientRect().top + containerRef.current.getBoundingClientRect().height / 2
+    } : null);
 
-    const dx = clientX - centerX;
-    const dy = clientY - centerY;
+    if (!center) return;
+
+    const dx = clientX - center.x;
+    const dy = clientY - center.y;
 
     const distance = Math.sqrt(dx * dx + dy * dy);
     let knobX = dx;
@@ -61,7 +74,7 @@ export default function MobileControls() {
     setJoystick({ x: normalizedX, y: normalizedY });
   };
 
-  // Setup global mouse move listeners for desktop drag testing
+  // Setup global mouse and touch move listeners for robust screen dragging
   useEffect(() => {
     const onMouseMove = (e) => {
       if (touchIdRef.current === 'mouse') {
@@ -74,46 +87,72 @@ export default function MobileControls() {
       }
     };
 
-    if (isDragging && touchIdRef.current === 'mouse') {
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+    const onTouchMove = (e) => {
+      if (touchIdRef.current !== null && touchIdRef.current !== 'mouse') {
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          if (touch.identifier === touchIdRef.current) {
+            handleMove(touch.clientX, touch.clientY);
+            break;
+          }
+        }
+      }
+    };
+
+    const onTouchEnd = (e) => {
+      if (touchIdRef.current !== null && touchIdRef.current !== 'mouse') {
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          if (touch.identifier === touchIdRef.current) {
+            handleEnd();
+            break;
+          }
+        }
+      }
+    };
+
+    if (isDragging) {
+      if (touchIdRef.current === 'mouse') {
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      } else {
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+        window.addEventListener('touchend', onTouchEnd);
+        window.addEventListener('touchcancel', onTouchEnd);
+      }
     }
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
     };
-  }, [isDragging]);
+  }, [isDragging, joystickCenter]);
 
-  // Touch listener
+  // Touch snap listener
+  const handleSnapTouchStart = (e) => {
+    const touch = e.changedTouches[0];
+    if (touch.clientX > window.innerWidth * 0.5) return; // Only snap on left half
+    
+    handleStart(touch.clientX, touch.clientY, touch.identifier, { x: touch.clientX, y: touch.clientY });
+  };
+
+  // Mouse snap listener
+  const handleSnapMouseDown = (e) => {
+    if (e.button !== 0 || e.clientX > window.innerWidth * 0.5) return; // Left click on left half only
+    
+    handleStart(e.clientX, e.clientY, 'mouse', { x: e.clientX, y: e.clientY });
+  };
+
   const handleTouchStart = (e) => {
     const touch = e.changedTouches[0];
     handleStart(touch.clientX, touch.clientY, touch.identifier);
   };
 
-  const handleTouchMove = (e) => {
-    if (!isDragging) return;
-    for (let i = 0; i < e.changedTouches.length; i++) {
-      const touch = e.changedTouches[i];
-      if (touch.identifier === touchIdRef.current) {
-        handleMove(touch.clientX, touch.clientY);
-        break;
-      }
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    if (!isDragging) return;
-    for (let i = 0; i < e.changedTouches.length; i++) {
-      const touch = e.changedTouches[i];
-      if (touch.identifier === touchIdRef.current) {
-        handleEnd();
-        break;
-      }
-    }
-  };
-
   const handleMouseDown = (e) => {
+    if (e.button !== 0) return;
     handleStart(e.clientX, e.clientY, 'mouse');
   };
 
@@ -159,18 +198,32 @@ export default function MobileControls() {
       pointerEvents: 'none',
       zIndex: 45
     }}>
+      {/* 0. Large Snap Zone (Left 50% of the screen) */}
+      <div 
+        onMouseDown={handleSnapMouseDown}
+        onTouchStart={handleSnapTouchStart}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '50vw',
+          height: '100%',
+          pointerEvents: 'auto',
+          touchAction: 'none',
+          zIndex: 42
+        }}
+      />
+
       {/* 1. Joystick Area (Bottom Left) */}
       <div 
         ref={containerRef}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
         style={{
           position: 'absolute',
-          bottom: '25px',
-          left: '25px',
+          bottom: joystickCenter ? 'auto' : '25px',
+          left: joystickCenter ? `${joystickCenter.x - 45}px` : '25px',
+          top: joystickCenter ? `${joystickCenter.y - 45}px` : 'auto',
           width: '90px',
           height: '90px',
           borderRadius: '50%',
@@ -183,7 +236,8 @@ export default function MobileControls() {
           justifyContent: 'center',
           touchAction: 'none',
           pointerEvents: 'auto',
-          cursor: 'grab'
+          cursor: 'grab',
+          zIndex: 43
         }}
       >
         {/* Inner stick track direction lines */}

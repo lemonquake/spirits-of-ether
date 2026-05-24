@@ -1837,6 +1837,49 @@ export const useGameStore = create((set, get) => ({
             }
           }));
         }
+      } else if (type === 'def') {
+        const shieldVal = 15;
+        const shieldName = 'Guard';
+        const newShield = {
+          id: 'shield',
+          name: shieldName,
+          type: 'buff',
+          duration: 2,
+          value: shieldVal,
+          description: `Defending. Defense increased by ${shieldVal}.`
+        };
+
+        logMsg = `${attacker} takes a defensive stance, boosting defense by ${shieldVal}!`;
+        spawnFloatingText('DEFEND', 'heal', getPos(attacker));
+
+        set((state) => ({
+          characters: {
+            ...state.characters,
+            [attacker]: {
+              ...hero,
+              effects: [...(hero.effects || []).filter(eff => eff.id !== 'shield'), newShield]
+            }
+          },
+          combat: {
+            ...state.combat,
+            logs: [logMsg, ...state.combat.logs],
+            floatingTexts: newFloatingTexts,
+            animatingAction: { attacker, type: 'def', damage: 0, target: attacker },
+            lastActionSummary: {
+              attacker: attacker,
+              type: 'def',
+              targets: [{
+                name: attacker,
+                damage: 0,
+                isCrit: false,
+                healing: 0,
+                effectsApplied: [shieldName],
+                defeated: false
+              }],
+              logMsg
+            }
+          }
+        }));
       }
     }
 
