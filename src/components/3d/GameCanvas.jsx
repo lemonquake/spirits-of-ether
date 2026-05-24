@@ -51,7 +51,7 @@ export default function GameCanvas() {
   return (
     <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
       <Canvas
-        shadows
+        shadows={{ type: THREE.PCFShadowMap }}
         camera={{ position: [0, 8, 10], fov: 45 }}
         gl={{ antialias: true }}
         onPointerDown={(e) => {

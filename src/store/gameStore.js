@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { STORIES } from '../utils/storyData';
 
 export const ENEMY_TEMPLATES = {
   slime: {
@@ -240,6 +241,8 @@ export const useGameStore = create((set, get) => ({
   controlScheme: 'NORMAL', // 'NORMAL' | 'MOBILE'
   joystick: { x: 0, y: 0 },
   isPaused: false,
+  bgmVolume: 0.65,
+  sfxVolume: 0.80,
   activeCharacterIndex: 0, // 0 for Azrin, 1 for Azrael (in exploration or combat UI selection)
   defeatedEnemies: [], // IDs of enemies defeated in the overworld
   respawnQueue: [],
@@ -254,6 +257,11 @@ export const useGameStore = create((set, get) => ({
     avatarType: '', // 'dadilo_alex'
     lines: [],
     currentLineIndex: 0,
+    onComplete: null
+  },
+  storyState: {
+    activeStoryId: null,
+    stepIndex: 0,
     onComplete: null
   },
   playerPosition: [0, 0.5, 0], // Store player coordinates to return to after combat
@@ -292,6 +300,65 @@ export const useGameStore = create((set, get) => ({
 
   // State modifiers
   setPlayerPosition: (pos) => set({ playerPosition: pos }),
+  startStory: (storyId, onComplete) => set({
+    phase: 'STORY',
+    storyState: {
+      activeStoryId: storyId,
+      stepIndex: 0,
+      onComplete
+    }
+  }),
+  nextStoryStep: () => {
+    const { storyState } = get();
+    if (!storyState.activeStoryId) return;
+    
+    const story = STORIES[storyState.activeStoryId];
+    if (!story) return;
+    
+    if (storyState.stepIndex + 1 >= story.length) {
+      set({
+        phase: 'EXPLORING',
+        storyState: {
+          activeStoryId: null,
+          stepIndex: 0,
+          onComplete: null
+        }
+      });
+      if (storyState.onComplete) storyState.onComplete();
+    } else {
+      set((state) => ({
+        storyState: {
+          ...state.storyState,
+          stepIndex: state.storyState.stepIndex + 1
+        }
+      }));
+    }
+  },
+  prevStoryStep: () => {
+    const { storyState } = get();
+    if (!storyState.activeStoryId) return;
+    
+    set((state) => ({
+      storyState: {
+        ...state.storyState,
+        stepIndex: Math.max(0, state.storyState.stepIndex - 1)
+      }
+    }));
+  },
+  skipStory: () => {
+    const { storyState } = get();
+    if (!storyState.activeStoryId) return;
+    
+    set({
+      phase: 'EXPLORING',
+      storyState: {
+        activeStoryId: null,
+        stepIndex: 0,
+        onComplete: null
+      }
+    });
+    if (storyState.onComplete) storyState.onComplete();
+  },
   startDialogue: (speakerName, avatarType, lines, onComplete) => set((state) => ({
     dialogue: {
       active: true,
@@ -366,6 +433,8 @@ export const useGameStore = create((set, get) => ({
     }));
   },
   setPhase: (phase) => set({ phase }),
+  setBgmVolume: (bgmVolume) => set({ bgmVolume }),
+  setSfxVolume: (sfxVolume) => set({ sfxVolume }),
   setControlScheme: (controlScheme) => set({ controlScheme }),
   setJoystick: (joystick) => set({ joystick }),
   setIsPaused: (isPaused) => set({ isPaused }),
@@ -2322,6 +2391,11 @@ export const useGameStore = create((set, get) => ({
       stamina: 100,
       movementMode: 'WALK',
       isStaminaExhausted: false,
+      storyState: {
+        activeStoryId: null,
+        stepIndex: 0,
+        onComplete: null
+      }
     };
   })
 }));

@@ -1,12 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import { Sparkles, Laptop, Smartphone } from 'lucide-react';
+import { Sparkles, Laptop, Smartphone, Settings, Volume2 } from 'lucide-react';
 import { useGameStore } from '../../store/gameStore';
 import { playHoverSound, playClickSound } from '../../utils/audio';
 
 export default function MainMenu() {
   const setPhase = useGameStore(state => state.setPhase);
   const setControlScheme = useGameStore(state => state.setControlScheme);
+  const startStory = useGameStore(state => state.startStory);
+  
+  const bgmVolume = useGameStore(state => state.bgmVolume);
+  const setBgmVolume = useGameStore(state => state.setBgmVolume);
+  const sfxVolume = useGameStore(state => state.sfxVolume);
+  const setSfxVolume = useGameStore(state => state.setSfxVolume);
+
   const [showControlSelection, setShowControlSelection] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
   const [zoomBackground, setZoomBackground] = useState(false);
   
   const canvasRef = useRef(null);
@@ -103,15 +111,23 @@ export default function MainMenu() {
     setShowControlSelection(true);
   };
 
+  const handleOptionsClick = () => {
+    playClickSound();
+    setShowOptions(true);
+  };
+
   const handleBackToMenuClick = () => {
     playClickSound();
     setShowControlSelection(false);
+    setShowOptions(false);
   };
 
   const selectControls = (scheme) => {
     playClickSound();
     setControlScheme(scheme);
-    setPhase('EXPLORING');
+    startStory('intro', () => {
+      setPhase('EXPLORING');
+    });
   };
 
   return (
@@ -223,7 +239,7 @@ export default function MainMenu() {
           </div>
 
           {/* Menu selections */}
-          {!showControlSelection ? (
+          {!showControlSelection && !showOptions ? (
             <div style={{
               display: 'flex',
               flexDirection: 'column',
@@ -247,6 +263,26 @@ export default function MainMenu() {
                 <Sparkles size={16} />
                 <span>START ADVENTURE</span>
               </button>
+
+              <button
+                className="glass-button"
+                onClick={handleOptionsClick}
+                onMouseEnter={playHoverSound}
+                style={{
+                  padding: '12px 30px',
+                  fontSize: '14px',
+                  width: '100%',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+              >
+                <Settings size={14} />
+                <span>OPTIONS</span>
+              </button>
               
               <div style={{
                 fontSize: '11px',
@@ -258,6 +294,113 @@ export default function MainMenu() {
               }}>
                 V1.0.0 Stable Build
               </div>
+            </div>
+          ) : showOptions ? (
+            <div className="glass-panel" style={{
+              padding: '30px 40px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '24px',
+              width: '320px',
+              animation: 'pop-bounce 0.4s var(--ease-bounce-spring) forwards',
+              background: 'linear-gradient(135deg, rgba(30, 18, 11, 0.94) 0%, rgba(15, 9, 5, 0.97) 100%), url("/splash.png") center/cover no-repeat'
+            }}>
+              <h3 style={{
+                fontFamily: 'var(--font-title)',
+                color: 'var(--rpg-gold)',
+                fontSize: '18px',
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}>
+                <Settings size={18} style={{ animation: 'spin-slow 8s infinite linear' }} />
+                <span>OPTIONS</span>
+              </h3>
+
+              <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.08)', margin: '5px 0' }} />
+
+              {/* Audio Preferences */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', textAlign: 'left', padding: '0 5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--rpg-gold)', fontWeight: 'bold', letterSpacing: '0.05em' }}>
+                  <Volume2 size={13} />
+                  <span>AUDIO PREFERENCES</span>
+                </div>
+                
+                {/* BGM Volume */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <span>Music Volume</span>
+                    <span style={{ color: 'var(--rpg-gold)', fontWeight: 600 }}>{Math.round(bgmVolume * 100)}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1" 
+                    step="0.05" 
+                    value={bgmVolume} 
+                    onMouseEnter={playHoverSound}
+                    onChange={(e) => {
+                      setBgmVolume(parseFloat(e.target.value));
+                    }}
+                    onMouseUp={playClickSound}
+                    onTouchEnd={playClickSound}
+                    style={{
+                      width: '100%',
+                      accentColor: 'var(--rpg-gold)',
+                      background: 'rgba(255,255,255,0.1)',
+                      height: '5px',
+                      borderRadius: '2px',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </div>
+
+                {/* SFX Volume */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    <span>Game Sounds Volume</span>
+                    <span style={{ color: 'var(--ether-cyan)', fontWeight: 600 }}>{Math.round(sfxVolume * 100)}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1" 
+                    step="0.05" 
+                    value={sfxVolume} 
+                    onMouseEnter={playHoverSound}
+                    onChange={(e) => {
+                      setSfxVolume(parseFloat(e.target.value));
+                    }}
+                    onMouseUp={playClickSound}
+                    onTouchEnd={playClickSound}
+                    style={{
+                      width: '100%',
+                      accentColor: 'var(--ether-cyan)',
+                      background: 'rgba(255,255,255,0.1)',
+                      height: '5px',
+                      borderRadius: '2px',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ width: '100%', height: '1px', background: 'rgba(255,255,255,0.08)', margin: '5px 0' }} />
+
+              <button 
+                className="glass-button" 
+                onClick={handleBackToMenuClick}
+                onMouseEnter={playHoverSound}
+                style={{ padding: '8px 16px', fontSize: '11px', alignSelf: 'center', cursor: 'pointer' }}
+              >
+                <span>Back to Menu</span>
+              </button>
             </div>
           ) : (
             <div className="glass-panel" style={{
@@ -372,6 +515,13 @@ export default function MainMenu() {
           )}
         </div>
       </div>
+      {/* Settings animation styling */}
+      <style>{`
+        @keyframes spin-slow {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

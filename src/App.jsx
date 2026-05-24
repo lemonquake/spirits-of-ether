@@ -13,6 +13,7 @@ import PauseMenu from './components/ui/PauseMenu';
 import MobileControls from './components/ui/MobileControls';
 import InteractiveMap from './components/ui/InteractiveMap';
 import SplashScreen from './components/ui/SplashScreen';
+import StoryEngine from './components/ui/StoryEngine';
 
 export default function App() {
   const phase = useGameStore(state => state.phase);
@@ -57,6 +58,11 @@ export default function App() {
       {/* Main Menu Overlay */}
       {phase === 'MENU' && (
         <MainMenu />
+      )}
+
+      {/* Story Overlay */}
+      {phase === 'STORY' && (
+        <StoryEngine />
       )}
 
       {/* Pause Menu Overlay */}
